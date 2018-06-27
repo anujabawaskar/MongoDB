@@ -1,0 +1,5 @@
+Write an aggregation query that will return the postal codes that cover each city
+
+
+db.zips.aggregate([
+{"$group" : {"_id":"$city", "postal_codes" : {"$addToSet" : "$_id"}}}])
