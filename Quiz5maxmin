@@ -1,0 +1,5 @@
+Query that will return the population of the postal code in each state with the highest population.
+
+
+db.zips.aggregate([
+{$group : {"_id" : "$state", pop: {$max : "$pop"}}}])
