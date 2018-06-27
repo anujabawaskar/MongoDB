@@ -1,0 +1,3 @@
+Write an aggregation query to sum up the population (pop) by state and put the result in a field called population. 
+
+db.zips.aggregate([{"$group":{"_id":"$state", "population":{$sum:"$pop"}}}])
