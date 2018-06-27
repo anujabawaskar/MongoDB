@@ -1,0 +1,13 @@
+Write an aggregation query with a single projection stage that will transform the documents in the zips collection
+
+
+
+db.zips.aggregate([
+{$project :
+{_id:0,
+city : {$toLower:"$city"},
+pop:1,
+state:1,
+zip: "$_id"
+}}
+])
