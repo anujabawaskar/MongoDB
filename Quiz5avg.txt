@@ -1,0 +1,5 @@
+Write an aggregation expression to calculate the average population of a zip code (postal code) by state.
+
+
+db.zips.aggregate([
+{"$group":{"_id":"$state", "average_pop" : {"$avg":"$pop"}}}])
