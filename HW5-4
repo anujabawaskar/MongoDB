@@ -1,0 +1,18 @@
+Using the aggregation framework, calculate the sum total of people who are living in a zip code where the city starts with one of those possible first characters.
+
+
+
+db.zips.aggregate([
+{$project: {
+	'_id' : 0,
+	'first_char': {$substr : ["$city",0,1]},
+	'pop' : 1}
+},
+{$match : {
+	$or : [{first_char : "B"}, {first_char : "D"}, {first_char : "O"}, {first_char : "G"}, {first_char : "N"}, {first_char : "M"}]}
+},
+{$group : {
+	'_id' : null,
+	'sumall' : {"$sum" : "$pop"}}
+}
+])
