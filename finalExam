@@ -1,0 +1,258 @@
+1. Construct a query to calculate the number of messages sent by Andrew Fastow, CFO, to Jeff Skilling, the president. Andrew Fastow's email addess was andrew.fastow@enron.com. Jeff Skilling's email was jeff.skilling@enron.com.
+
+Answer :  db.messages.find({"headers.From" : "andrew.fastow@enron.com", "headers.To" : "jeff.skilling@enron.com"}).count()
+
+2. Which pair of people have the greatest number of messages in the dataset?
+
+Answer :  db.messages.aggregate({$unwind: "$headers.To"}, {$group : {_id : {"from": "$headers.From", "to" : "$headers.To"}, emails : {$sum: 1}}}, {$sort: {emails : -1}})
+
+3. Please add the email address "mrpotatohead@mongodb.com" to the list of addresses in the "headers.To" array for the document with "headers.Message-ID" of "<8147308.1075851042335.JavaMail.evans@thyme>"
+
+Answer :  db.messages.update({"headers.Message-ID":"<8147308.1075851042335.JavaMail.evans@thyme>"},{$addToSet:{"headers.To":"mrpotatohead@mongodb.com"}})
+
+4. In this problem, you will be enhancing the blog project to support users liking certain comments and the like counts showing up the in the permalink page.
+
+Answer : postsCollection.updateOne(new BasicDBObject("permalink", permalink),
+                new BasicDBObject("$inc", new BasicDBObject("comments." + ordinal + ".num_likes", 1)));
+                
+5. Suppose your have a collection stuff which has the _id index,
+
+{
+  "v" : 1,
+  "key" : {
+    "_id" : 1
+  },
+  "ns" : "test.stuff",
+  "name" : "_id_"
+}
+and one or more of the following indexes as well:
+
+{
+  "v" : 1,
+  "key" : {
+    "a" : 1,
+    "b" : 1
+  },
+  "ns" : "test.stuff",
+  "name" : "a_1_b_1"
+}
+{
+  "v" : 1,
+  "key" : {
+    "a" : 1,
+    "c" : 1
+  },
+  "ns" : "test.stuff",
+  "name" : "a_1_c_1"
+}
+{
+  "v" : 1,
+  "key" : {
+    "c" : 1
+  },
+  "ns" : "test.stuff",
+  "name" : "c_1"
+}
+{
+  "v" : 1,
+  "key" : {
+    "a" : 1,
+    "b" : 1,
+    "c" : -1
+  },
+  "ns" : "test.stuff",
+  "name" : "a_1_b_1_c_-1"
+}
+Now suppose you want to run the following query against the collection.
+
+db.stuff.find({'a':{'$lt':10000}, 'b':{'$gt': 5000}}, {'a':1, 'c':1}).sort({'c':-1})
+Which of the indexes could be used by MongoDB to assist in answering the query? Check all that apply.
+
+Answer : 
+c_1
+a_1_b_1
+a_1_c_1
+a_1_b_1_c_-1
+
+6. Now suppose that basic inserts into the collection, which only include the last name, first name and student_id, are too slow (we can't do enough of them per second from our program). And while there are many potential application/hardware solutions such as batching, increasing bandwidth (or RAM), etc., which of the following listed options could potentially improve the speed of inserts?
+
+Check all that apply.
+
+Answer : * Remove all indexes from the collection, leaving only the index on _id in place
+* Set w=0, j=0 on writes
+
+
+7. db.messages.find({"headers.From" : "andrew.fastow@enron.com"
+
+Answer : Refer .java file
+44787 is the answer.
+
+8. Supposed we executed the following Java code. How many animals will be inserted into the "animals" collection?
+
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
+
+public class InsertTest {
+        public static void main(String[] args) {
+            MongoClient c =  new MongoClient();
+            MongoDatabase db = c.getDatabase("test");
+            MongoCollection<Document> animals = db.getCollection("animals");
+
+           Document animal = new Document("animal", "monkey");
+
+            animals.insertOne(animal);
+            animal.remove("animal");
+            animal.append("animal", "cat");
+            animals.insertOne(animal);
+            animal.remove("animal");
+            animal.append("animal", "lion");
+            animals.insertOne(animal);
+        }
+}
+
+Answer : 1
+Duplicate key error is thrown
+
+9. 
+Imagine an electronic medical record database designed to hold the medical records of every individual in the United States. Because each person has more than 16MB of medical history and records, it's not feasible to have a single document for every patient. Instead, there is a patient collection that contains basic information on each person and maps the person to a patient_id, and a record collection that contains one document for each test or procedure. One patient may have dozens or even hundreds of documents in the record collection.
+
+We need to decide on a shard key to shard the record collection. What's the best shard key for the record collection, provided that we are willing to run inefficient scatter-gather operations to do infrequent research and run studies on various diseases and cohorts? That is, think mostly about the operational aspects of such a system. And by operational, we mean, think about what the most common operations that this systems needs to perform day in and day out.
+
+Answer : patient_id
+
+10. We perform the following query on the enron dataset:
+
+var exp = db.messages.explain('executionStats')
+
+exp.find( { 'headers.Date' : { '$gt' : new Date(2001,3,1) } }, { 'headers.From' : 1, '_id' : 0 } ).sort( { 'headers.From' : 1 } )
+and get the following explain output.
+
+{
+  "queryPlanner" : {
+    "plannerVersion" : 1,
+    "namespace" : "enron.messages",
+    "indexFilterSet" : false,
+    "parsedQuery" : {
+      "headers.Date" : {
+        "$gt" : ISODate("2001-04-01T05:00:00Z")
+      }
+    },
+    "winningPlan" : {
+      "stage" : "PROJECTION",
+      "transformBy" : {
+        "headers.From" : 1,
+        "_id" : 0
+      },
+      "inputStage" : {
+        "stage" : "FETCH",
+        "filter" : {
+          "headers.Date" : {
+            "$gt" : ISODate("2001-04-01T05:00:00Z")
+          }
+        },
+        "inputStage" : {
+          "stage" : "IXSCAN",
+          "keyPattern" : {
+            "headers.From" : 1
+          },
+          "indexName" : "headers.From_1",
+          "isMultiKey" : false,
+          "direction" : "forward",
+          "indexBounds" : {
+            "headers.From" : [
+              "[MinKey, MaxKey]"
+            ]
+          }
+        }
+      }
+    },
+    "rejectedPlans" : [ ]
+  },
+  "executionStats" : {
+    "executionSuccess" : true,
+    "nReturned" : 83057,
+    "executionTimeMillis" : 726,
+    "totalKeysExamined" : 120477,
+    "totalDocsExamined" : 120477,
+    "executionStages" : {
+      "stage" : "PROJECTION",
+      "nReturned" : 83057,
+      "executionTimeMillisEstimate" : 690,
+      "works" : 120478,
+      "advanced" : 83057,
+      "needTime" : 37420,
+      "needFetch" : 0,
+      "saveState" : 941,
+      "restoreState" : 941,
+      "isEOF" : 1,
+      "invalidates" : 0,
+      "transformBy" : {
+        "headers.From" : 1,
+        "_id" : 0
+      },
+      "inputStage" : {
+        "stage" : "FETCH",
+        "filter" : {
+          "headers.Date" : {
+            "$gt" : ISODate("2001-04-01T05:00:00Z")
+          }
+        },
+        "nReturned" : 83057,
+        "executionTimeMillisEstimate" : 350,
+        "works" : 120478,
+        "advanced" : 83057,
+        "needTime" : 37420,
+        "needFetch" : 0,
+        "saveState" : 941,
+        "restoreState" : 941,
+        "isEOF" : 1,
+        "invalidates" : 0,
+        "docsExamined" : 120477,
+        "alreadyHasObj" : 0,
+        "inputStage" : {
+          "stage" : "IXSCAN",
+          "nReturned" : 120477,
+          "executionTimeMillisEstimate" : 60,
+          "works" : 120477,
+          "advanced" : 120477,
+          "needTime" : 0,
+          "needFetch" : 0,
+          "saveState" : 941,
+          "restoreState" : 941,
+          "isEOF" : 1,
+          "invalidates" : 0,
+          "keyPattern" : {
+            "headers.From" : 1
+          },
+          "indexName" : "headers.From_1",
+          "isMultiKey" : false,
+          "direction" : "forward",
+          "indexBounds" : {
+            "headers.From" : [
+              "[MinKey, MaxKey]"
+            ]
+          },
+          "keysExamined" : 120477,
+          "dupsTested" : 0,
+          "dupsDropped" : 0,
+          "seenInvalidated" : 0,
+          "matchTested" : 0
+        }
+      }
+    }
+  },
+  "serverInfo" : {
+    "host" : "dpercy-mac-air.local",
+    "port" : 27017,
+    "version" : "3.0.1",
+    "gitVersion" : "534b5a3f9d10f00cd27737fbcd951032248b5952"
+  },
+  "ok" : 1
+}
+Check below all the statements that are true about the way MongoDB handled this query.
+
+Answer:
+ (X) The query scanned every document in the collection.
+  (X) The query avoided sorting the documents because it was able to use an index's ordering.
